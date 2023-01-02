@@ -9,9 +9,9 @@ def test_update_listing_price():
     # act
     contract = SaturnMarketPlace.deploy({"from": account_deploy})
     new_listing_price = 0.00025
-    result = contract.updateListingPrice(Web3.toWei(new_listing_price, 'ether'))
+    result = contract.updateListingPrice(Web3.toWei(new_listing_price, 'ether'), {"from": account_deploy})
     result.wait(1)
-    new_price = contract.listingPrice()
+    new_price = contract.getListingPrice()
     # assert
     expect = Web3.toWei(new_listing_price, 'ether')
     assert new_price == expect
