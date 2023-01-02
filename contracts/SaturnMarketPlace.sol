@@ -27,7 +27,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
 
     // an object in list items
     struct marketItem {
-        uint256 _tokenId;
+        // uint256 _tokenId;
         address payable _seller;
         address payable _owner;
         uint256 _price;
@@ -77,7 +77,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
         require(price > 0, "price must be greater than 0");
         require(msg.value == listingPrice);
         tokenIdToItem[newTokenId] = marketItem(
-            newTokenId,
+            // newTokenId,
             payable(msg.sender),
             payable(address(this)),
             price,
@@ -95,7 +95,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
         // add item to marketplace mapping
         require(msg.value == listingPrice);
         tokenIdToItem[newTokenId] = marketItem(
-            newTokenId,
+            // newTokenId,
             payable(address(0)),
             payable(msg.sender),
             0,
@@ -129,7 +129,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
         tokenIdToItem[tokenId]._seller = payable(address(0));
         tokenIdToItem[tokenId]._owner = payable(msg.sender);
         tokenIdToItem[tokenId]._isSelling = false;
-        _transfer(seller, msg.sender, tokenId);
+        _transfer(address(this), msg.sender, tokenId);
         payable(admin).transfer(listingPrice);
         payable(seller).transfer(msg.value);
         addressToCountAddressListing[seller] -= 1;
@@ -144,7 +144,8 @@ contract SaturnMarketPlace is ERC721URIStorage {
             if (tokenIdToItem[i]._isSelling == true) {
                 listItems[index] = fetchItem(
                     tokenURI(i),
-                    tokenIdToItem[i]._tokenId,
+                    i,
+                    // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
@@ -168,7 +169,8 @@ contract SaturnMarketPlace is ERC721URIStorage {
             ) {
                 listItems[index] = fetchItem(
                     tokenURI(i),
-                    tokenIdToItem[i]._tokenId,
+                    i,
+                    // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
@@ -189,7 +191,8 @@ contract SaturnMarketPlace is ERC721URIStorage {
             if (tokenIdToItem[i]._owner == msg.sender) {
                 listItems[index] = fetchItem(
                     tokenURI(i),
-                    tokenIdToItem[i]._tokenId,
+                    i,
+                    // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
