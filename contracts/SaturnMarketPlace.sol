@@ -46,7 +46,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
     // mapping store all the item in maketplace
     mapping(uint256 => marketItem) private tokenIdToItem;
 
-    constructor() ERC721("Saturn", "STR") {
+    constructor() ERC721("SaturnMK", "STMK") {
         admin = payable(msg.sender);
     }
 
