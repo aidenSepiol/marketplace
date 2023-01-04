@@ -6,55 +6,56 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 // import "./SaturnMarketPlace.sol";
-// import "./SaturnBoxDetail.sol";
+import "./SaturnBoxDetail.sol";
+import "./Utils.sol";
+import "../interfaces/IAgentRepo.sol";
 
 contract SaturnBox is ERC721URIStorage {
     using Counters for Counters.Counter;
-    // using SaturnBoxDetail for SaturnBoxDetail.BoxDetail;
+    using SaturnBoxDetail for SaturnBoxDetail.BoxDetail;
     // we use the quantity of the token to init the new tokenId
     Counters.Counter private countTokenIds;
     // this is admin, the ones who deploy this contract, we use this to recognize him when some call a function that only admin can call
     address payable admin;
     uint256 countBoxTypes;
+    IAgentRepo public aRepo;
 
-    struct WeightAgent {
-        uint256 _common;
-        uint256 _rare;
-        uint256 _elite;
-        uint256 _epic;
-        uint256 _legendary;
-        uint256 _mythical;
-    }
-    struct BoxDetail {
-        uint256 _id;
-        // uint256 index; // index of id in user token array
-        uint256 _price; // price box
-        uint256 _box_type; // 1 -> 3: agent box.
-        bool _is_opened; // 0: still not open, 1: opened
-        address _owner_by; // Owner token before on chain for marketplace.
-    }
+    // struct WeightAgentRarity {
+    //     uint256 _common;
+    //     uint256 _rare;
+    //     uint256 _elite;
+    //     uint256 _epic;
+    //     uint256 _legendary;
+    //     uint256 _mythical;
+    // }
 
     mapping(uint256 => string) private typeBoxtoURI;
     mapping(uint256 => uint256) private typeBoxtoPrice;
-    mapping(uint256 => WeightAgent) private typeBoxtoWeight;
-    mapping(uint256 => BoxDetail) private tokenIdToBoxDetail;
+    //AgentRarity => 0:common, 1:rare, 2:elite, 3:epic, 4:legendary, 5:mythical
+    mapping(uint256 => uint256[]) private typeBoxtoWeight;
+    mapping(uint256 => SaturnBoxDetail.BoxDetail) private tokenIdToBoxDetail;
 
     constructor() ERC721("SaturnB", "STB") {
         admin = payable(msg.sender);
         // initialize countBoxTypes
         countBoxTypes = 3; // we have 3 boxes
         // initialize the weight
-        typeBoxtoWeight[1] = WeightAgent(40, 30, 10, 10, 5, 5); //box type 1: box level 1
-        typeBoxtoWeight[2] = WeightAgent(20, 20, 25, 10, 15, 10); //box type 2: box level 2
-        typeBoxtoWeight[3] = WeightAgent(10, 15, 15, 15, 20, 25); //box type 3: box level 3
+        typeBoxtoWeight[1] = [40, 30, 10, 10, 5, 5]; //box type 1: small_box
+        typeBoxtoWeight[2] = [20, 20, 25, 10, 15, 10]; //box type 2: big_box
+        typeBoxtoWeight[3] = [10, 15, 15, 15, 20, 25]; //box type 3: mega_box
         // initialize the Image box URI
-        typeBoxtoURI[1] = "http://localhost/#######/img1.png"; //box type 1: box level 1 image url
-        typeBoxtoURI[2] = "http://localhost/#######/img2.png"; //box type 2: box level 2 image url
-        typeBoxtoURI[3] = "http://localhost/#######/img3.png"; //box type 2: box level 3 image url
+        typeBoxtoURI[1] = "http://localhost/#######/img1.png"; //box type 1: small_box image url
+        typeBoxtoURI[2] = "http://localhost/#######/img2.png"; //box type 2: big_box image url
+        typeBoxtoURI[3] = "http://localhost/#######/img3.png"; //box type 2: mega_box image url
         // initialize box price
-        typeBoxtoPrice[1] = 100000000 wei; //box type 1: box level 1 price
-        typeBoxtoPrice[2] = 100000000 wei; //box type 2: box level 2 price
-        typeBoxtoPrice[3] = 100000000 wei; //box type 3: box level 3 price
+        typeBoxtoPrice[1] = 100000000 wei; //box type 1: small_box price
+        typeBoxtoPrice[2] = 100000000 wei; //box type 2: big_box price
+        typeBoxtoPrice[3] = 100000000 wei; //box type 3: mega_box price
+    }
+
+    // set contract AgentRepo
+    function setDesign(address contractAddress) external {
+        aRepo = IAgentRepo(contractAddress);
     }
 
     // update weight for each box type, require admin
@@ -73,14 +74,14 @@ contract SaturnBox is ERC721URIStorage {
             "This BoxType is not valid!"
         );
         // TODO: require the typeBox is valid
-        typeBoxtoWeight[typeBox] = WeightAgent(
+        typeBoxtoWeight[typeBox] = [
             _common,
             _rare,
             _elite,
             _epic,
             _legendary,
             _mythical
-        );
+        ];
     }
 
     // update price for each box type, require admin
@@ -117,14 +118,18 @@ contract SaturnBox is ERC721URIStorage {
         _safeMint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, typeBoxtoURI[typeBox]);
 
-        // SaturnBoxDetail.BoxDetail memory newBoxDetail;
-        tokenIdToBoxDetail[newTokenId] = BoxDetail(
-            newTokenId,
-            typeBoxtoPrice[typeBox],
-            typeBox,
-            false,
-            address(this)
-        );
+        uint256 targetBlock = block.number + 5;
+        SaturnBoxDetail.BoxDetail memory newBoxDetail = SaturnBoxDetail
+            .BoxDetail(
+                newTokenId,
+                targetBlock,
+                typeBoxtoPrice[typeBox],
+                typeBox,
+                false,
+                address(this)
+            );
+
+        tokenIdToBoxDetail[newTokenId] = newBoxDetail;
         return newTokenId;
     }
 
@@ -145,12 +150,27 @@ contract SaturnBox is ERC721URIStorage {
     }
 
     // open a box
-    function openBox(uint256 tokenId) external payable {}
+    function openBox(uint256 tokenId) external payable {
+        // check if the blocknumber is already valid or not
+        uint256 targetBlock = tokenIdToBoxDetail[tokenId]._targetBLock;
+        require(targetBlock < block.number, "Target block not arrived");
+        uint256 seed = uint256(blockhash(targetBlock));
+        //request mint agent in saturnMKP
+        //get random rarity => 0:common, 1:rare, 2:elite, 3:epic, 4:legendary, 5:mythical
+        uint256 rarity;
+        (seed, rarity) = Utils.randomByWeights(seed, typeBoxtoWeight[tokenId]);
+        //random agentName => request contract AgenRepo
+        uint256 agentId;
+        (seed, agentId) = aRepo.getRandomAgentId(seed);
+        // request SaturnMKP input(agentName, rarity, seed) -> SaturnMKP request AgentRepo to get URI -> mintAgent
+
+        // set status box
+    }
 
     // get my box
     function getMyBox(uint256 tokenId)
         external
         view
-        returns (BoxDetail[] memory)
+        returns (SaturnBoxDetail.BoxDetail[] memory)
     {}
 }
