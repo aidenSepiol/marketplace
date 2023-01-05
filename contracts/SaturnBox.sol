@@ -9,16 +9,20 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./SaturnBoxDetail.sol";
 import "./Utils.sol";
 import "../interfaces/IAgentRepo.sol";
+import "../interfaces/ISaturnMarketPlace.sol";
 
 contract SaturnBox is ERC721URIStorage {
     using Counters for Counters.Counter;
     using SaturnBoxDetail for SaturnBoxDetail.BoxDetail;
+
+    uint256 private openPrice = 25000000000 wei;
     // we use the quantity of the token to init the new tokenId
     Counters.Counter private countTokenIds;
     // this is admin, the ones who deploy this contract, we use this to recognize him when some call a function that only admin can call
     address payable admin;
     uint256 countBoxTypes;
     IAgentRepo public aRepo;
+    ISaturnMarketPlace public iSaturnMarketPlace;
 
     // struct WeightAgentRarity {
     //     uint256 _common;
@@ -54,8 +58,12 @@ contract SaturnBox is ERC721URIStorage {
     }
 
     // set contract AgentRepo
-    function setDesign(address contractAddress) external {
-        aRepo = IAgentRepo(contractAddress);
+    function setDesign(
+        address contractAddressAgentRepo,
+        address contractAddressSaturnMKP
+    ) external {
+        aRepo = IAgentRepo(contractAddressAgentRepo);
+        iSaturnMarketPlace = ISaturnMarketPlace(contractAddressSaturnMKP);
     }
 
     // update weight for each box type, require admin
@@ -151,6 +159,7 @@ contract SaturnBox is ERC721URIStorage {
 
     // open a box
     function openBox(uint256 tokenId) external payable {
+        require(msg.value == openPrice, "Require payment to open a box");
         // check if the blocknumber is already valid or not
         uint256 targetBlock = tokenIdToBoxDetail[tokenId]._targetBLock;
         require(targetBlock < block.number, "Target block not arrived");
@@ -163,8 +172,9 @@ contract SaturnBox is ERC721URIStorage {
         uint256 agentId;
         (seed, agentId) = aRepo.getRandomAgentId(seed);
         // request SaturnMKP input(agentName, rarity, seed) -> SaturnMKP request AgentRepo to get URI -> mintAgent
-
+        iSaturnMarketPlace.mint(msg.sender, agentId, rarity, seed);
         // set status box
+        tokenIdToBoxDetail[tokenId]._is_opened = true;
     }
 
     // get my box

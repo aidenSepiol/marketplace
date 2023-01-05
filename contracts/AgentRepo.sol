@@ -5,11 +5,14 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../interfaces/AgentStats.sol";
 import "./SaturnBoxDetail.sol";
 import "./Utils.sol";
+import "./AgentDetail.sol";
 import "../interfaces/IAgentRepo.sol";
+import "./Utils.sol";
 
 // to init all Agent
 contract AgentRepo is AccessControl, IAgentRepo {
     using SaturnBoxDetail for SaturnBoxDetail.BoxDetail;
+    using AgentDetail for AgentDetail.Detail;
 
     uint256 private countQuantityAgents;
     // function initialize public {
@@ -45,5 +48,86 @@ contract AgentRepo is AccessControl, IAgentRepo {
     }
 
     // for contract SaturnMarketPlace request to get URI  input(agentName, rarity, seed) returns(uint256 URI)
-    // function createRandomToken() external
+    function createRandomToken(
+        uint256 tokenId,
+        uint256 agentId,
+        uint256 rarity,
+        uint256 seed
+    ) external view returns (uint256, uint256) {
+        // only SaturnMarketPlace allowed
+        AgentDetail.Detail memory ADetail;
+
+        ADetail.tokenId = tokenId;
+        ADetail.agentId = agentId;
+        ADetail.isOnchain = 1;
+        ADetail.baseRarity = rarity;
+        ADetail.rarity = rarity;
+        ADetail.level = 1;
+
+        AgentStats.Stats memory stats = agentStats[agentId].getStats(rarity);
+
+        (seed, ADetail.damage) = Utils.randomRangeInclusive(
+            seed,
+            stats.damage.min,
+            stats.damage.max
+        );
+        (seed, ADetail.hp) = Utils.randomRangeInclusive(
+            seed,
+            stats.hp.min,
+            stats.hp.max
+        );
+        (seed, ADetail.evasion) = Utils.randomRangeInclusive(
+            seed,
+            stats.evasion.min,
+            stats.evasion.max
+        );
+        (seed, ADetail.armor) = Utils.randomRangeInclusive(
+            seed,
+            stats.armor.min,
+            stats.armor.max
+        );
+        (seed, ADetail.combo) = Utils.randomRangeInclusive(
+            seed,
+            stats.combo.min,
+            stats.combo.max
+        );
+        (seed, ADetail.precision) = Utils.randomRangeInclusive(
+            seed,
+            stats.precision.min,
+            stats.precision.max
+        );
+        (seed, ADetail.accuracy) = Utils.randomRangeInclusive(
+            seed,
+            stats.accuracy.min,
+            stats.accuracy.max
+        );
+        (seed, ADetail.counter) = Utils.randomRangeInclusive(
+            seed,
+            stats.counter.min,
+            stats.counter.max
+        );
+        (seed, ADetail.reversal) = Utils.randomRangeInclusive(
+            seed,
+            stats.reversal.min,
+            stats.reversal.max
+        );
+        (seed, ADetail.lock) = Utils.randomRangeInclusive(
+            seed,
+            stats.lock.min,
+            stats.lock.max
+        );
+        (seed, ADetail.disarm) = Utils.randomRangeInclusive(
+            seed,
+            stats.disarm.min,
+            stats.disarm.max
+        );
+        (seed, ADetail.speed) = Utils.randomRangeInclusive(
+            seed,
+            stats.speed.min,
+            stats.speed.max
+        );
+
+        uint256 tokenURI = ADetail.encode();
+        return (seed, tokenURI);
+    }
 }

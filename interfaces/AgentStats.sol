@@ -22,5 +22,5 @@ interface AgentStats {
         StatsRange speed;
     }
 
-    // function getStats(uint256 rarity) external view returns (Stats memory);
+    function getStats(uint256 rarity) external view returns (Stats memory);
 }

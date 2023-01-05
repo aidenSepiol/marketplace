@@ -7,10 +7,10 @@ interface IAgentRepo {
         view
         returns (uint256, uint256);
 
-    // function createRandomToken(
-    //     uint256 seed,
-    //     uint256 id,
-    //     uint256 rarity,
-    //     uint256 boxType
-    // ) external returns (uint256 nextSeed);
+    function createRandomToken(
+        uint256 tokenId,
+        uint256 agentId,
+        uint256 rarity,
+        uint256 seed
+    ) external view returns (uint256 nextSeed, uint256 tokenURI);
 }

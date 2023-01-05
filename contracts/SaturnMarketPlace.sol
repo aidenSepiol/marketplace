@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "../interfaces/IAgentRepo.sol";
 
 contract SaturnMarketPlace is ERC721URIStorage {
     using Counters for Counters.Counter;
@@ -18,6 +19,9 @@ contract SaturnMarketPlace is ERC721URIStorage {
 
     // this is the listing fee when you list your NFT to maketplace
     uint256 private listingPrice = 25000000000 wei;
+
+    // Optional mapping for token details
+    mapping(uint256 => uint256) private _tokenURIDetails;
 
     //
     mapping(address => uint256) private addressToCountAddressListing;
@@ -35,7 +39,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
     }
     // struct item return
     struct fetchItem {
-        string _tokenURI;
+        uint256 _tokenURIDetail;
         uint256 _tokenId;
         address payable _seller;
         address payable _owner;
@@ -48,6 +52,14 @@ contract SaturnMarketPlace is ERC721URIStorage {
 
     constructor() ERC721("SaturnMK", "STMK") {
         admin = payable(msg.sender);
+    }
+
+    // agent repo
+    IAgentRepo public aRepo;
+
+    // set contract AgentRepo
+    function setDesign(address contractAddress) external {
+        aRepo = IAgentRepo(contractAddress);
     }
 
     // for admin only: to update listing price
@@ -64,40 +76,72 @@ contract SaturnMarketPlace is ERC721URIStorage {
         return listingPrice;
     }
 
-    function createNFTOnMarket(string memory tokenURI, uint256 price)
-        external
-        payable
-    {
-        countTokenIds.increment();
-        countTokenListing.increment();
-        uint256 newTokenId = countTokenIds.current();
-        _safeMint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
-        // list item to marketplace mapping
-        require(price > 0, "price must be greater than 0");
-        require(msg.value == listingPrice);
-        tokenIdToItem[newTokenId] = marketItem(
-            // newTokenId,
-            payable(msg.sender),
-            payable(address(this)),
-            price,
-            true
-        );
-        _transfer(msg.sender, address(this), newTokenId);
-        addressToCountAddressListing[msg.sender] += 1;
-    }
+    // function createNFTOnMarket(string memory tokenURI, uint256 price)
+    //     external
+    //     payable
+    // {
+    //     countTokenIds.increment();
+    //     countTokenListing.increment();
+    //     uint256 newTokenId = countTokenIds.current();
+    //     _safeMint(msg.sender, newTokenId);
+    //     _setTokenURI(newTokenId, tokenURI);
+    //     // list item to marketplace mapping
+    //     require(price > 0, "price must be greater than 0");
+    //     require(msg.value == listingPrice);
+    //     tokenIdToItem[newTokenId] = marketItem(
+    //         // newTokenId,
+    //         payable(msg.sender),
+    //         payable(address(this)),
+    //         price,
+    //         true
+    //     );
+    //     _transfer(msg.sender, address(this), newTokenId);
+    //     addressToCountAddressListing[msg.sender] += 1;
+    // }
 
-    function createMyNFT(string memory tokenURI) external payable {
+    // function createMyNFT(string memory tokenURI) external payable {
+    //     countTokenIds.increment();
+    //     uint256 newTokenId = countTokenIds.current();
+    //     _safeMint(msg.sender, newTokenId);
+    //     _setTokenURI(newTokenId, tokenURI);
+    //     // add item to marketplace mapping
+    //     require(msg.value == listingPrice);
+    //     tokenIdToItem[newTokenId] = marketItem(
+    //         // newTokenId,
+    //         payable(address(0)),
+    //         payable(msg.sender),
+    //         0,
+    //         false
+    //     );
+    // }
+
+    // only contract can request this function
+    function mint(
+        address owner,
+        uint256 agentId,
+        uint256 rarity,
+        uint256 seed
+    ) external {
+        // require(msg.value == listingPrice); // FIXME: do not pay
         countTokenIds.increment();
         uint256 newTokenId = countTokenIds.current();
-        _safeMint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
+        _safeMint(owner, newTokenId);
+        // string memory tokenURI;
+        uint256 tokenURI;
+        uint256 newSeed;
+        (newSeed, tokenURI) = aRepo.createRandomToken(
+            newTokenId,
+            agentId,
+            rarity,
+            seed
+        );
+        _tokenURIDetails[newTokenId] = tokenURI;
         // add item to marketplace mapping
-        require(msg.value == listingPrice);
+
         tokenIdToItem[newTokenId] = marketItem(
             // newTokenId,
             payable(address(0)),
-            payable(msg.sender),
+            payable(owner),
             0,
             false
         );
@@ -143,7 +187,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
         for (uint256 i = 1; i < countTokenIds.current() + 1; i++) {
             if (tokenIdToItem[i]._isSelling == true) {
                 listItems[index] = fetchItem(
-                    tokenURI(i),
+                    _tokenURIDetails[i],
                     i,
                     // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,
@@ -168,7 +212,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
                 tokenIdToItem[i]._seller == msg.sender
             ) {
                 listItems[index] = fetchItem(
-                    tokenURI(i),
+                    _tokenURIDetails[i],
                     i,
                     // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,
@@ -190,7 +234,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
         for (uint256 i = 1; i < countTokenIds.current() + 1; i++) {
             if (tokenIdToItem[i]._owner == msg.sender) {
                 listItems[index] = fetchItem(
-                    tokenURI(i),
+                    _tokenURIDetails[i],
                     i,
                     // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,

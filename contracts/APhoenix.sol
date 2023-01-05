@@ -103,4 +103,9 @@ contract APhoenix is AccessControl, AgentStats {
             StatsRange(41, 52)
         );
     }
+
+    function getStats(uint256 rarity) external view returns (Stats memory) {
+        // Get stats base
+        return agentRarityStats[rarity];
+    }
 }
