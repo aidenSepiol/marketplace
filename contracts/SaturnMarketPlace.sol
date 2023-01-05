@@ -5,9 +5,11 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "../interfaces/IAgentRepo.sol";
+import "./AgentDetail.sol";
 
 contract SaturnMarketPlace is ERC721URIStorage {
     using Counters for Counters.Counter;
+    using AgentDetail for AgentDetail.Detail;
 
     // we use the quantity of the token to init the new tokenId
     Counters.Counter private countTokenIds;
@@ -177,6 +179,25 @@ contract SaturnMarketPlace is ERC721URIStorage {
         payable(admin).transfer(listingPrice);
         payable(seller).transfer(msg.value);
         addressToCountAddressListing[seller] -= 1;
+    }
+
+    function onChain(uint256 tokenId, uint256 agentEncoded) external {
+        // verify agentEncoded if external for all user
+        AgentDetail.Detail memory details = AgentDetail.decode(agentEncoded);
+        details.isOnchain = 1;
+        _tokenURIDetails[tokenId] = details.encode();
+    }
+
+    /** Update warrior off chain for the owner. */
+    function offChain(uint256 tokenId) external {
+        address owner = msg.sender;
+        require(ownerOf(tokenId) == owner, "Token not owned");
+
+        AgentDetail.Detail memory details = AgentDetail.decode(
+            _tokenURIDetails[tokenId]
+        );
+        details.isOnchain = 0;
+        _tokenURIDetails[tokenId] = details.encode();
     }
 
     // get all Items that are listing on marketplace
