@@ -54,6 +54,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         uint256 _price;
         bool _isSelling;
         string _tokenImg;
+        string _tokenName;
     }
 
     // mapping store all the item in maketplace
@@ -218,6 +219,9 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                 AgentDetail.Detail memory detail = AgentDetail.decode(
                     _tokenURIDetails[i]
                 );
+                string memory aName;
+                string memory aImg;
+                (aName, aImg) = aRepo.getAgentNameAndImg(i);
                 listItems[index] = fetchItem(
                     detail,
                     i,
@@ -226,7 +230,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
                     tokenIdToItem[i]._isSelling,
-                    aRepo.getAgentImg(i)
+                    aImg,
+                    aName
                 );
                 index += 1;
             }
@@ -247,6 +252,9 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                 AgentDetail.Detail memory detail = AgentDetail.decode(
                     _tokenURIDetails[i]
                 );
+                string memory aName;
+                string memory aImg;
+                (aName, aImg) = aRepo.getAgentNameAndImg(i);
                 listItems[index] = fetchItem(
                     detail,
                     i,
@@ -255,7 +263,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
                     tokenIdToItem[i]._isSelling,
-                    aRepo.getAgentImg(i)
+                    aImg,
+                    aName
                 );
                 index += 1;
             }
@@ -273,6 +282,9 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                 AgentDetail.Detail memory detail = AgentDetail.decode(
                     _tokenURIDetails[i]
                 );
+                string memory aName;
+                string memory aImg;
+                (aName, aImg) = aRepo.getAgentNameAndImg(i);
                 listItems[index] = fetchItem(
                     detail,
                     i,
@@ -281,7 +293,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
                     tokenIdToItem[i]._isSelling,
-                    aRepo.getAgentImg(i)
+                    aImg,
+                    aName
                 );
                 index += 1;
             }

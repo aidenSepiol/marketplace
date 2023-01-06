@@ -51,7 +51,8 @@ def deploy_contract():
         "http://localhost/#######/aimg8.png",
         "http://localhost/#######/aimg9.png"
     ]
-    address_agent_repo.initializeAgent(list_agent_address, list_agent_weights, list_agent_imgs, {"from": account})
+    list_agent_names = ["name0", "name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8", "name9"]
+    address_agent_repo.initializeAgent(list_agent_address, list_agent_weights, list_agent_imgs, list_agent_names, {"from": account})
     address_agent_repo.setupRoleSaturnBox(address_saturn_box, {"from": account})
     address_agent_repo.setupRoleSaturnMKP(address_saturn_mkp, {"from": account})
 

@@ -23,6 +23,7 @@ contract AgentRepo is AccessControl, IAgentRepo {
     AgentStats[] public agentStats;
     uint256[] private AgentWeights;
     string[] private imgAgents;
+    string[] private nameAgents;
 
     // AccessControl
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -50,27 +51,30 @@ contract AgentRepo is AccessControl, IAgentRepo {
     function initializeAgent(
         address[] memory _contractAddress,
         uint256[] memory _agentWeights,
-        string[] memory _imgAgents
+        string[] memory _imgAgents,
+        string[] memory _nameAgents
     ) external onlyRole(ADMIN_ROLE) {
         delete agentStats;
         delete AgentWeights;
         delete imgAgents;
+        delete nameAgents;
         countQuantityAgents = 0;
         for (uint256 i = 0; i < _contractAddress.length; i++) {
             agentStats.push(AgentStats(_contractAddress[i]));
             AgentWeights.push(_agentWeights[i]);
             imgAgents.push(_imgAgents[i]);
+            nameAgents.push(_nameAgents[i]);
             countQuantityAgents += 1;
         }
     }
 
-    function getAgentImg(uint256 agentId)
+    function getAgentNameAndImg(uint256 agentId)
         external
         view
         onlyRole(SATURNMKP_ROLE)
-        returns (string memory)
+        returns (string memory, string memory)
     {
-        return imgAgents[agentId];
+        return (nameAgents[agentId], imgAgents[agentId]);
     }
 
     // for contract SaturnBox request
