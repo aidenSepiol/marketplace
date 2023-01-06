@@ -39,7 +39,19 @@ def deploy_contract():
         address_agent_viper
     ]
     list_agent_weights = [1] * len(list_agent_address)
-    address_agent_repo.initializeAgent(list_agent_address, list_agent_weights, {"from": account})
+    list_agent_imgs = [
+        "http://localhost/#######/aimg0.png",
+        "http://localhost/#######/aimg1.png",
+        "http://localhost/#######/aimg2.png",
+        "http://localhost/#######/aimg3.png",
+        "http://localhost/#######/aimg4.png",
+        "http://localhost/#######/aimg5.png",
+        "http://localhost/#######/aimg6.png",
+        "http://localhost/#######/aimg7.png",
+        "http://localhost/#######/aimg8.png",
+        "http://localhost/#######/aimg9.png"
+    ]
+    address_agent_repo.initializeAgent(list_agent_address, list_agent_weights, list_agent_imgs, {"from": account})
     address_agent_repo.setupRoleSaturnBox(address_saturn_box, {"from": account})
     address_agent_repo.setupRoleSaturnMKP(address_saturn_mkp, {"from": account})
 

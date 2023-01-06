@@ -13,4 +13,9 @@ interface IAgentRepo {
         uint256 rarity,
         uint256 seed
     ) external view returns (uint256 nextSeed, uint256 tokenURI);
+
+    function getAgentImg(uint256 agentId)
+        external
+        view
+        returns (string memory agentImg);
 }

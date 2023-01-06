@@ -53,6 +53,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         address payable _owner;
         uint256 _price;
         bool _isSelling;
+        string _tokenImg;
     }
 
     // mapping store all the item in maketplace
@@ -224,7 +225,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                     tokenIdToItem[i]._seller,
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
-                    tokenIdToItem[i]._isSelling
+                    tokenIdToItem[i]._isSelling,
+                    aRepo.getAgentImg(i)
                 );
                 index += 1;
             }
@@ -252,7 +254,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                     tokenIdToItem[i]._seller,
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
-                    tokenIdToItem[i]._isSelling
+                    tokenIdToItem[i]._isSelling,
+                    aRepo.getAgentImg(i)
                 );
                 index += 1;
             }
@@ -277,7 +280,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                     tokenIdToItem[i]._seller,
                     tokenIdToItem[i]._owner,
                     tokenIdToItem[i]._price,
-                    tokenIdToItem[i]._isSelling
+                    tokenIdToItem[i]._isSelling,
+                    aRepo.getAgentImg(i)
                 );
                 index += 1;
             }
