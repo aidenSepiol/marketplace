@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../interfaces/AgentStats.sol";
-import "./SaturnBoxDetail.sol";
+// import "./SaturnBoxDetail.sol";
 import "./Utils.sol";
 import "./AgentDetail.sol";
 import "../interfaces/IAgentRepo.sol";
@@ -11,22 +11,45 @@ import "./Utils.sol";
 
 // to init all Agent
 contract AgentRepo is AccessControl, IAgentRepo {
-    using SaturnBoxDetail for SaturnBoxDetail.BoxDetail;
+    // using SaturnBoxDetail for SaturnBoxDetail.BoxDetail;
     using AgentDetail for AgentDetail.Detail;
 
+    // this is admin, the ones who deploy this contract, we use this to recognize him when some call a function that only admin can call
+    address payable admin;
+
     uint256 private countQuantityAgents;
-    // function initialize public {
-    //     //setup role
-    // }
 
     // array agent for random choose
     AgentStats[] public agentStats;
     uint256[] private AgentWeights;
 
+    // AccessControl
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant DESIGNER_ROLE = keccak256("DESIGNER_ROLE");
+    bytes32 public constant SATURNBOX_ROLE = keccak256("SATURNBOX_ROLE");
+    bytes32 public constant SATURNMKP_ROLE = keccak256("SATURNMKP_ROLE");
+    modifier onlyRole(bytes32 role) {
+        require(hasRole(role, msg.sender) == true, "Required role");
+        _;
+    }
+
+    constructor() {
+        admin = payable(msg.sender);
+        _setupRole(ADMIN_ROLE, admin);
+    }
+
+    function setupRoleSaturnBox(address account) external onlyRole(ADMIN_ROLE) {
+        _setupRole(SATURNBOX_ROLE, account);
+    }
+
+    function setupRoleSaturnMKP(address account) external onlyRole(ADMIN_ROLE) {
+        _setupRole(SATURNMKP_ROLE, account);
+    }
+
     function initializeAgent(
         address[] memory contractAddress,
         uint256[] memory agentWeights
-    ) external {
+    ) external onlyRole(ADMIN_ROLE) {
         delete agentStats;
         countQuantityAgents = 0;
         for (uint256 i = 0; i < contractAddress.length; i++) {
@@ -40,6 +63,7 @@ contract AgentRepo is AccessControl, IAgentRepo {
     function getRandomAgentId(uint256 seed)
         external
         view
+        onlyRole(SATURNBOX_ROLE)
         returns (uint256, uint256)
     {
         uint256 agentId;
@@ -53,7 +77,7 @@ contract AgentRepo is AccessControl, IAgentRepo {
         uint256 agentId,
         uint256 rarity,
         uint256 seed
-    ) external view returns (uint256, uint256) {
+    ) external view onlyRole(SATURNMKP_ROLE) returns (uint256, uint256) {
         // only SaturnMarketPlace allowed
         AgentDetail.Detail memory ADetail;
 

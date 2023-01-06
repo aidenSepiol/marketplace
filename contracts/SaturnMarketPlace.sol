@@ -4,10 +4,11 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../interfaces/IAgentRepo.sol";
 import "./AgentDetail.sol";
 
-contract SaturnMarketPlace is ERC721URIStorage {
+contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     using Counters for Counters.Counter;
     using AgentDetail for AgentDetail.Detail;
 
@@ -31,6 +32,9 @@ contract SaturnMarketPlace is ERC721URIStorage {
     // this is admin, the ones who deploy this contract, we use this to recognize him when some call a function that only admin can call
     address payable admin;
 
+    // agent repo
+    IAgentRepo public aRepo;
+
     // an object in list items
     struct marketItem {
         // uint256 _tokenId;
@@ -41,7 +45,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
     }
     // struct item return
     struct fetchItem {
-        uint256 _tokenURIDetail;
+        AgentDetail.Detail _tokenURIDetail;
         uint256 _tokenId;
         address payable _seller;
         address payable _owner;
@@ -52,24 +56,44 @@ contract SaturnMarketPlace is ERC721URIStorage {
     // mapping store all the item in maketplace
     mapping(uint256 => marketItem) private tokenIdToItem;
 
-    constructor() ERC721("SaturnMK", "STMK") {
-        admin = payable(msg.sender);
+    // AccessControl
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant SATURNBOX_ROLE = keccak256("SATURNBOX_ROLE");
+    modifier onlyRole(bytes32 role) {
+        require(hasRole(role, msg.sender) == true, "Required role");
+        _;
     }
 
-    // agent repo
-    IAgentRepo public aRepo;
+    constructor(address saturnBoxAddress) ERC721("SaturnMKP", "SMKP") {
+        admin = payable(msg.sender);
+        _setupRole(ADMIN_ROLE, admin);
+        _setupRole(SATURNBOX_ROLE, saturnBoxAddress);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721, AccessControl)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
 
     // set contract AgentRepo
-    function setDesign(address contractAddress) external {
-        aRepo = IAgentRepo(contractAddress);
+    function initializeContract(address contractAddressAgentRepo)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
+        aRepo = IAgentRepo(contractAddressAgentRepo);
     }
 
     // for admin only: to update listing price
-    function updateListingPrice(uint256 newPrice) external payable {
-        require(
-            msg.sender == admin,
-            "Only admin can update the listing price!"
-        );
+    function updateListingPrice(uint256 newPrice)
+        external
+        payable
+        onlyRole(ADMIN_ROLE)
+    {
         listingPrice = newPrice;
     }
 
@@ -78,52 +102,13 @@ contract SaturnMarketPlace is ERC721URIStorage {
         return listingPrice;
     }
 
-    // function createNFTOnMarket(string memory tokenURI, uint256 price)
-    //     external
-    //     payable
-    // {
-    //     countTokenIds.increment();
-    //     countTokenListing.increment();
-    //     uint256 newTokenId = countTokenIds.current();
-    //     _safeMint(msg.sender, newTokenId);
-    //     _setTokenURI(newTokenId, tokenURI);
-    //     // list item to marketplace mapping
-    //     require(price > 0, "price must be greater than 0");
-    //     require(msg.value == listingPrice);
-    //     tokenIdToItem[newTokenId] = marketItem(
-    //         // newTokenId,
-    //         payable(msg.sender),
-    //         payable(address(this)),
-    //         price,
-    //         true
-    //     );
-    //     _transfer(msg.sender, address(this), newTokenId);
-    //     addressToCountAddressListing[msg.sender] += 1;
-    // }
-
-    // function createMyNFT(string memory tokenURI) external payable {
-    //     countTokenIds.increment();
-    //     uint256 newTokenId = countTokenIds.current();
-    //     _safeMint(msg.sender, newTokenId);
-    //     _setTokenURI(newTokenId, tokenURI);
-    //     // add item to marketplace mapping
-    //     require(msg.value == listingPrice);
-    //     tokenIdToItem[newTokenId] = marketItem(
-    //         // newTokenId,
-    //         payable(address(0)),
-    //         payable(msg.sender),
-    //         0,
-    //         false
-    //     );
-    // }
-
     // only contract can request this function
     function mint(
         address owner,
         uint256 agentId,
         uint256 rarity,
         uint256 seed
-    ) external {
+    ) external onlyRole(SATURNBOX_ROLE) {
         // require(msg.value == listingPrice); // FIXME: do not pay
         countTokenIds.increment();
         uint256 newTokenId = countTokenIds.current();
@@ -181,7 +166,9 @@ contract SaturnMarketPlace is ERC721URIStorage {
         addressToCountAddressListing[seller] -= 1;
     }
 
-    function onChain(uint256 tokenId, uint256 agentEncoded) external {
+    function withdrawNFT(uint256 tokenId) external payable {}
+
+    function onChain(uint256 tokenId, uint256 agentEncoded) private {
         // verify agentEncoded if external for all user
         AgentDetail.Detail memory details = AgentDetail.decode(agentEncoded);
         details.isOnchain = 1;
@@ -189,7 +176,7 @@ contract SaturnMarketPlace is ERC721URIStorage {
     }
 
     /** Update warrior off chain for the owner. */
-    function offChain(uint256 tokenId) external {
+    function offChain(uint256 tokenId) private {
         address owner = msg.sender;
         require(ownerOf(tokenId) == owner, "Token not owned");
 
@@ -207,8 +194,11 @@ contract SaturnMarketPlace is ERC721URIStorage {
         uint256 index = 0;
         for (uint256 i = 1; i < countTokenIds.current() + 1; i++) {
             if (tokenIdToItem[i]._isSelling == true) {
+                AgentDetail.Detail memory detail = AgentDetail.decode(
+                    _tokenURIDetails[i]
+                );
                 listItems[index] = fetchItem(
-                    _tokenURIDetails[i],
+                    detail,
                     i,
                     // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,
@@ -232,8 +222,11 @@ contract SaturnMarketPlace is ERC721URIStorage {
                 tokenIdToItem[i]._isSelling == true &&
                 tokenIdToItem[i]._seller == msg.sender
             ) {
+                AgentDetail.Detail memory detail = AgentDetail.decode(
+                    _tokenURIDetails[i]
+                );
                 listItems[index] = fetchItem(
-                    _tokenURIDetails[i],
+                    detail,
                     i,
                     // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,
@@ -254,8 +247,11 @@ contract SaturnMarketPlace is ERC721URIStorage {
         uint256 index = 0;
         for (uint256 i = 1; i < countTokenIds.current() + 1; i++) {
             if (tokenIdToItem[i]._owner == msg.sender) {
+                AgentDetail.Detail memory detail = AgentDetail.decode(
+                    _tokenURIDetails[i]
+                );
                 listItems[index] = fetchItem(
-                    _tokenURIDetails[i],
+                    detail,
                     i,
                     // tokenIdToItem[i]._tokenId,
                     tokenIdToItem[i]._seller,

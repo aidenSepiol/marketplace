@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 // import "./SaturnMarketPlace.sol";
 import "./SaturnBoxDetail.sol";
@@ -11,7 +12,7 @@ import "./Utils.sol";
 import "../interfaces/IAgentRepo.sol";
 import "../interfaces/ISaturnMarketPlace.sol";
 
-contract SaturnBox is ERC721URIStorage {
+contract SaturnBox is ERC721URIStorage, AccessControl {
     using Counters for Counters.Counter;
     using SaturnBoxDetail for SaturnBoxDetail.BoxDetail;
 
@@ -39,8 +40,16 @@ contract SaturnBox is ERC721URIStorage {
     mapping(uint256 => uint256[]) private typeBoxtoWeight;
     mapping(uint256 => SaturnBoxDetail.BoxDetail) private tokenIdToBoxDetail;
 
+    // AccessControl
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    modifier onlyRole(bytes32 role) {
+        require(hasRole(role, msg.sender) == true, "Required role");
+        _;
+    }
+
     constructor() ERC721("SaturnB", "STB") {
         admin = payable(msg.sender);
+        _setupRole(ADMIN_ROLE, admin);
         // initialize countBoxTypes
         countBoxTypes = 3; // we have 3 boxes
         // initialize the weight
@@ -57,11 +66,21 @@ contract SaturnBox is ERC721URIStorage {
         typeBoxtoPrice[3] = 100000000 wei; //box type 3: mega_box price
     }
 
-    // set contract AgentRepo
-    function setDesign(
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721, AccessControl)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+
+    // set contract AgentRepo, ISaturnMarketPlace
+    function initializeContract(
         address contractAddressAgentRepo,
         address contractAddressSaturnMKP
-    ) external {
+    ) external onlyRole(ADMIN_ROLE) {
         aRepo = IAgentRepo(contractAddressAgentRepo);
         iSaturnMarketPlace = ISaturnMarketPlace(contractAddressSaturnMKP);
     }
@@ -75,7 +94,7 @@ contract SaturnBox is ERC721URIStorage {
         uint256 _epic,
         uint256 _legendary,
         uint256 _mythical
-    ) external payable {
+    ) external onlyRole(ADMIN_ROLE) {
         require(msg.sender == admin, "Only admin can update the weight!");
         require(
             typeBox >= 1 && typeBox <= countBoxTypes,
@@ -93,7 +112,10 @@ contract SaturnBox is ERC721URIStorage {
     }
 
     // update price for each box type, require admin
-    function updatePrice(uint256 typeBox, uint256 newPrice) external payable {
+    function updatePrice(uint256 typeBox, uint256 newPrice)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
         require(msg.sender == admin, "Only admin can update the weight!");
         require(
             typeBox >= 1 && typeBox <= countBoxTypes,
@@ -105,7 +127,7 @@ contract SaturnBox is ERC721URIStorage {
     //update box URI for each box type, require admin
     function updateBoxURI(uint256 typeBox, string memory newURI)
         external
-        payable
+        onlyRole(ADMIN_ROLE)
     {
         require(msg.sender == admin, "Only admin can update the weight!");
         require(

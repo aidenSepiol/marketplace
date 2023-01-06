@@ -10,7 +10,19 @@ contract ABrimStone is AccessControl, AgentStats {
 
     mapping(uint256 => Stats) private agentRarityStats;
 
-    function initialize() public {
+    address payable admin;
+    // AccessControl
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant REPO_ROLE = keccak256("REPO_ROLE");
+    modifier onlyRole(bytes32 role) {
+        require(hasRole(role, msg.sender) == true, "Required role");
+        _;
+    }
+
+    constructor(address repoAddress) {
+        admin = payable(msg.sender);
+        _setupRole(ADMIN_ROLE, admin);
+        _setupRole(REPO_ROLE, repoAddress);
         // common
         agentRarityStats[0] = Stats(
             StatsRange(36, 40),
@@ -104,7 +116,12 @@ contract ABrimStone is AccessControl, AgentStats {
         );
     }
 
-    function getStats(uint256 rarity) external view returns (Stats memory) {
+    function getStats(uint256 rarity)
+        external
+        view
+        onlyRole(REPO_ROLE)
+        returns (Stats memory)
+    {
         // Get stats base
         return agentRarityStats[rarity];
     }
