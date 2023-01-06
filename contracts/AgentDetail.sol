@@ -88,48 +88,49 @@ library AgentDetail {
         returns (Detail memory result)
     {
         uint256 bitIndex = 0;
+        // uint256 rightBitIndex = 0;
         // 30bits tokenId max value = 1073741823
-        result.tokenId = (1073741823 << bitIndex) & detail;
+        result.tokenId = ((1073741823 << bitIndex) & detail) >> bitIndex;
         bitIndex += 30;
         // 4bits agentId max value = 15
-        result.agentId = (15 << bitIndex) & detail;
+        result.agentId = ((15 << bitIndex) & detail) >> bitIndex;
         bitIndex += 4;
         // 1bit isOnchain max value = 1
-        result.isOnchain = (1 << bitIndex) & detail;
+        result.isOnchain = ((1 << bitIndex) & detail) >> bitIndex;
         bitIndex += 1;
         // 3bits baseRarity max value = 7
-        result.baseRarity = (7 << bitIndex) & detail;
+        result.baseRarity = ((7 << bitIndex) & detail) >> bitIndex;
         bitIndex += 3;
         // 3bits rarity max value = 7
-        result.rarity = (7 << bitIndex) & detail;
+        result.rarity = ((7 << bitIndex) & detail) >> bitIndex;
         bitIndex += 3;
         // 9bits level max value = 511
-        result.level = (511 << bitIndex) & detail;
+        result.level = ((511 << bitIndex) & detail) >> bitIndex;
         bitIndex += 9;
         // rest
-        result.damage = (1023 << bitIndex) & detail;
+        result.damage = ((1023 << bitIndex) & detail) >> bitIndex;
         bitIndex += 10;
-        result.hp = (4095 << bitIndex) & detail;
+        result.hp = ((4095 << bitIndex) & detail) >> bitIndex;
         bitIndex += 12;
-        result.evasion = (4095 << bitIndex) & detail;
+        result.evasion = ((4095 << bitIndex) & detail) >> bitIndex;
         bitIndex += 12;
-        result.armor = (1023 << bitIndex) & detail;
+        result.armor = ((1023 << bitIndex) & detail) >> bitIndex;
         bitIndex += 10;
-        result.combo = (1023 << bitIndex) & detail;
+        result.combo = ((1023 << bitIndex) & detail) >> bitIndex;
         bitIndex += 10;
-        result.precision = (4095 << bitIndex) & detail;
+        result.precision = ((4095 << bitIndex) & detail) >> bitIndex;
         bitIndex += 12;
-        result.accuracy = (4095 << bitIndex) & detail;
+        result.accuracy = ((4095 << bitIndex) & detail) >> bitIndex;
         bitIndex += 12;
-        result.counter = (1023 << bitIndex) & detail;
+        result.counter = ((1023 << bitIndex) & detail) >> bitIndex;
         bitIndex += 10;
-        result.reversal = (1023 << bitIndex) & detail;
+        result.reversal = ((1023 << bitIndex) & detail) >> bitIndex;
         bitIndex += 10;
-        result.lock = (1023 << bitIndex) & detail;
+        result.lock = ((1023 << bitIndex) & detail) >> bitIndex;
         bitIndex += 10;
-        result.disarm = (1023 << bitIndex) & detail;
+        result.disarm = ((1023 << bitIndex) & detail) >> bitIndex;
         bitIndex += 10;
-        result.speed = (1023 << bitIndex) & detail;
+        result.speed = ((1023 << bitIndex) & detail) >> bitIndex;
 
         return result;
     }

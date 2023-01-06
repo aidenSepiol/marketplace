@@ -39,6 +39,7 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
     //AgentRarity => 0:common, 1:rare, 2:elite, 3:epic, 4:legendary, 5:mythical
     mapping(uint256 => uint256[]) private typeBoxtoWeight;
     mapping(uint256 => SaturnBoxDetail.BoxDetail) private tokenIdToBoxDetail;
+    mapping(address => uint256) private addressToCountToken;
 
     // AccessControl
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -174,8 +175,9 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
             msg.value == tokenIdToBoxDetail[tokenId]._price,
             "Require payment!"
         );
-        _transfer(tokenIdToBoxDetail[tokenId]._owner_by, msg.sender, tokenId);
+        // _transfer(tokenIdToBoxDetail[tokenId]._owner_by, msg.sender, tokenId);
         tokenIdToBoxDetail[tokenId]._owner_by = msg.sender;
+        addressToCountToken[msg.sender] += 1;
         payable(admin).transfer(tokenIdToBoxDetail[tokenId]._price);
     }
 
@@ -197,12 +199,36 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
         iSaturnMarketPlace.mint(msg.sender, agentId, rarity, seed);
         // set status box
         tokenIdToBoxDetail[tokenId]._is_opened = true;
+        addressToCountToken[msg.sender] -= 1;
     }
 
     // get my box
-    function getMyBox(uint256 tokenId)
+    function getMyBox()
         external
         view
-        returns (SaturnBoxDetail.BoxDetail[] memory)
-    {}
+        returns (SaturnBoxDetail.fetchBoxDetail[] memory)
+    {
+        uint256 countBox = addressToCountToken[msg.sender];
+        SaturnBoxDetail.fetchBoxDetail[]
+            memory listBox = new SaturnBoxDetail.fetchBoxDetail[](countBox);
+        uint256 index = 0;
+        for (uint256 i = 1; i < countTokenIds.current() + 1; i++) {
+            if (
+                tokenIdToBoxDetail[i]._owner_by == msg.sender &&
+                tokenIdToBoxDetail[i]._is_opened == false
+            ) {
+                listBox[index] = SaturnBoxDetail.fetchBoxDetail(
+                    tokenIdToBoxDetail[i]._id,
+                    tokenIdToBoxDetail[i]._targetBLock,
+                    tokenIdToBoxDetail[i]._price,
+                    tokenIdToBoxDetail[i]._box_type,
+                    tokenIdToBoxDetail[i]._is_opened,
+                    tokenIdToBoxDetail[i]._owner_by,
+                    typeBoxtoURI[tokenIdToBoxDetail[i]._box_type]
+                );
+                index += 1;
+            }
+        }
+        return listBox;
+    }
 }

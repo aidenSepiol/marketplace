@@ -22,6 +22,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
 
     // this is the listing fee when you list your NFT to maketplace
     uint256 private listingPrice = 25000000000 wei;
+    uint256 private onChainPrice = 25000000000 wei;
+    uint256 private offChainPrice = 25000000000 wei;
 
     // Optional mapping for token details
     mapping(uint256 => uint256) private _tokenURIDetails;
@@ -61,6 +63,14 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     bytes32 public constant SATURNBOX_ROLE = keccak256("SATURNBOX_ROLE");
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, msg.sender) == true, "Required role");
+        _;
+    }
+
+    modifier requireOnChain(uint256 tokenId) {
+        AgentDetail.Detail memory details = AgentDetail.decode(
+            _tokenURIDetails[tokenId]
+        );
+        require(details.isOnchain == 1, "Requires onChain");
         _;
     }
 
@@ -134,7 +144,11 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         );
     }
 
-    function sellNFT(uint256 tokenId, uint256 price) external payable {
+    function sellNFT(uint256 tokenId, uint256 price)
+        external
+        payable
+        requireOnChain(tokenId)
+    {
         require(msg.value == listingPrice);
         require(msg.sender == ownerOf(tokenId), "Only owner of token can sell");
         require(
@@ -142,6 +156,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                 tokenIdToItem[tokenId]._owner != payable(address(this)),
             "NFT is listing on marketplace"
         );
+        // require on chain
+
         require(price > 0, "price must be greater than 0");
         countTokenListing.increment();
         tokenIdToItem[tokenId]._seller = payable(msg.sender);
@@ -150,6 +166,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         tokenIdToItem[tokenId]._isSelling = true;
         _transfer(msg.sender, address(this), tokenId);
         addressToCountAddressListing[msg.sender] += 1;
+        payable(admin).transfer(listingPrice);
     }
 
     function purchaseNFT(uint256 tokenId) external payable {
@@ -161,14 +178,16 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         tokenIdToItem[tokenId]._owner = payable(msg.sender);
         tokenIdToItem[tokenId]._isSelling = false;
         _transfer(address(this), msg.sender, tokenId);
-        payable(admin).transfer(listingPrice);
         payable(seller).transfer(msg.value);
         addressToCountAddressListing[seller] -= 1;
     }
 
-    function withdrawNFT(uint256 tokenId) external payable {}
+    // function withdrawNFT(uint256 tokenId) external payable {}
 
-    function onChain(uint256 tokenId, uint256 agentEncoded) private {
+    function onChain(uint256 tokenId, uint256 agentEncoded)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
         // verify agentEncoded if external for all user
         AgentDetail.Detail memory details = AgentDetail.decode(agentEncoded);
         details.isOnchain = 1;
@@ -176,9 +195,10 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     }
 
     /** Update warrior off chain for the owner. */
-    function offChain(uint256 tokenId) private {
+    function offChain(uint256 tokenId) external payable {
         address owner = msg.sender;
         require(ownerOf(tokenId) == owner, "Token not owned");
+        require(msg.value == offChainPrice, "Required payment!");
 
         AgentDetail.Detail memory details = AgentDetail.decode(
             _tokenURIDetails[tokenId]

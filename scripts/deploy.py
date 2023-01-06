@@ -1,6 +1,7 @@
 from brownie import ABreach, ABrimStone, ACypher, AJett, AOmen, APhoenix, ARaze, ASage, ASova, AViper, AgentRepo, SaturnBox, SaturnMarketPlace
 
 from scripts.helper import get_account
+from web3 import Web3
 
 
 def deploy_contract():
@@ -66,12 +67,94 @@ def deploy_contract():
     return response_data
 
 
-def test(contracts_dict):
-    pass
+def test_buy_a_box(contracts_dict):
+    import time
+    account_2 = get_account(index=2)
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 100000000})
+    time.sleep(3)
+    my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
+    print(my_box)
+
+    account_3 = get_account(index=3)
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_3, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_3, "value": 100000000})
+    time.sleep(3)
+    my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_3})
+    print(my_box)
+
+
+def test_buy_and_open_a_box(contracts_dict):
+    import time
+    # buy a box
+    print("Buying a box........")
+    account_2 = get_account(index=2)
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 100000000})
+    my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
+    print(f"Bought successfully: {my_box}")
+
+    # before unbox
+    before = contracts_dict["address_saturn_mkp"].getMyItems({"from": account_2})
+    print(f"Inventory before openBox: {before}")
+
+    # open my box
+
+    print("Opening my first box........")
+    first_box = my_box[0]
+    box_id = first_box[0]
+    contracts_dict["address_saturn_box"].openBox(box_id, {"from": account_2, "value": 25000000000})
+    my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
+    print(f"Opened my first box successfully, my box left: {my_box}")
+
+    # after unbox
+    after = contracts_dict["address_saturn_mkp"].getMyItems({"from": account_2})
+    print(f"Inventory after openBox: {after}")
+
+
+def test_buy_and_open_a_box_then_list_to_marketplace(contracts_dict):
+    test_buy_and_open_a_box(contracts_dict)
+    print("Listing my first NFT to marketplace........")
+    account_2 = get_account(index=2)
+    my_item = contracts_dict["address_saturn_mkp"].getMyItems({"from": account_2})
+    tokenId = my_item[0][1]
+    # option test on chain require
+    # contracts_dict["address_saturn_mkp"].offChain(tokenId, {"from": account_2, "value": 25000000000})
+    # list
+    contracts_dict["address_saturn_mkp"].sellNFT(tokenId, 25000000000, {"from": account_2, "value": 25000000000})
+    print("Listed my first NFT to marketplace successfully!!")
+
+    # my nft
+    my_item = contracts_dict["address_saturn_mkp"].getMyItems({"from": account_2})
+    print(f"Inventory after List: {my_item}")
+    my_list_item = contracts_dict["address_saturn_mkp"].getMyListedItems({"from": account_2})
+    print(f"My listed items: {my_list_item}")
+    return my_list_item[0][1], my_list_item[0][4]
+
+
+def test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(contracts_dict):
+    token_id, price = test_buy_and_open_a_box_then_list_to_marketplace(contracts_dict)
+
+    account_3 = get_account(index=3)
+    print(f"Inventory {account_3} before Buy: ")
+    my_item = contracts_dict["address_saturn_mkp"].getMyItems({"from": account_3})
+    print(my_item)
+
+    print(f"Address {account_3} is buying token {token_id} with price {price} wei......")
+    contracts_dict["address_saturn_mkp"].purchaseNFT(token_id, {"from": account_3, "value": price})
+    print("Buy successfully")
+
+    print(f"Inventory {account_3} after Buy: ")
+    my_item = contracts_dict["address_saturn_mkp"].getMyItems({"from": account_3})
+    print(my_item)
 
 
 def main():
     resp = deploy_contract()
     print("Deploy successfully!")
     print(resp)
-    test(resp)
+    test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
