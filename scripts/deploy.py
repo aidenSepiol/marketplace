@@ -57,6 +57,9 @@ def deploy_contract():
 
     # For SaturnBox
     address_saturn_box.initializeContract(address_agent_repo, address_saturn_mkp, {"from": account})
+    address_saturn_box.updateBoxURI(1, "http://localhost/#######/bimg1.png", {"from": account})
+    address_saturn_box.updateBoxURI(2, "http://localhost/#######/bimg2.png", {"from": account})
+    address_saturn_box.updateBoxURI(3, "http://localhost/#######/bimg3.png", {"from": account})
 
     # For SaturnMarketPlace
     address_saturn_mkp.initializeContract(address_agent_repo, {"from": account})

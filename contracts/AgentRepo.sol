@@ -53,6 +53,8 @@ contract AgentRepo is AccessControl, IAgentRepo {
         string[] memory _imgAgents
     ) external onlyRole(ADMIN_ROLE) {
         delete agentStats;
+        delete AgentWeights;
+        delete imgAgents;
         countQuantityAgents = 0;
         for (uint256 i = 0; i < _contractAddress.length; i++) {
             agentStats.push(AgentStats(_contractAddress[i]));
