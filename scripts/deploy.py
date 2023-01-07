@@ -1,4 +1,4 @@
-from brownie import ABreach, ABrimStone, ACypher, AJett, AOmen, APhoenix, ARaze, ASage, ASova, AViper, AgentRepo, SaturnBox, SaturnMarketPlace
+from brownie import Wei, ABreach, ABrimStone, ACypher, AJett, AOmen, APhoenix, ARaze, ASage, ASova, AViper, AgentRepo, SaturnBox, SaturnMarketPlace
 
 from scripts.helper import get_account
 from web3 import Web3
@@ -86,15 +86,15 @@ def deploy_contract():
 def test_buy_a_box(contracts_dict):
     import time
     account_2 = get_account(index=2)
-    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 100000000})
-    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 2000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 2000000000000})
     time.sleep(3)
     my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
     print(my_box)
 
     account_3 = get_account(index=3)
-    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_3, "value": 100000000})
-    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_3, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_3, "value": 2000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_3, "value": 2000000000000})
     time.sleep(3)
     my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_3})
     print(my_box)
@@ -179,4 +179,6 @@ def main():
 
     print(f'export const addressSaturnBox = "{saturn_box_a}";')
     print(f'export const addressSaturnMKP = "{saturn_mkp_a}";')
+
+    test_buy_a_box(resp)
     # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)

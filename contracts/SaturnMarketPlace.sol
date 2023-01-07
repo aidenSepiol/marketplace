@@ -24,9 +24,9 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     event requestOnChain(address requester, uint256 tokenId);
 
     // this is the listing fee when you list your NFT to maketplace
-    uint256 private listingPrice = 25000000000 wei;
-    uint256 private onChainPrice = 25000000000 wei;
-    uint256 private offChainPrice = 25000000000 wei;
+    uint256 private listingPrice = 2000 gwei;
+    uint256 private onChainPrice = 2000 gwei;
+    uint256 private offChainPrice = 2000 gwei;
 
     // Optional mapping for token details
     mapping(uint256 => uint256) private _tokenURIDetails;

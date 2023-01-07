@@ -16,7 +16,7 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
     using Counters for Counters.Counter;
     using SaturnBoxDetail for SaturnBoxDetail.BoxDetail;
 
-    uint256 private openPrice = 25000000000 wei;
+    uint256 private openPrice = 2000 gwei;
     // we use the quantity of the token to init the new tokenId
     Counters.Counter private countTokenIds;
     // this is admin, the ones who deploy this contract, we use this to recognize him when some call a function that only admin can call
@@ -65,9 +65,9 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
         typeBoxtoURI[2] = "http://localhost/#######/img2.png"; //box type 2: big_box image url
         typeBoxtoURI[3] = "http://localhost/#######/img3.png"; //box type 2: mega_box image url
         // initialize box price
-        typeBoxtoPrice[1] = 100000000 wei; //box type 1: small_box price
-        typeBoxtoPrice[2] = 100000000 wei; //box type 2: big_box price
-        typeBoxtoPrice[3] = 100000000 wei; //box type 3: mega_box price
+        typeBoxtoPrice[1] = 20000 gwei; //box type 1: small_box price
+        typeBoxtoPrice[2] = 30000 gwei; //box type 2: big_box price
+        typeBoxtoPrice[3] = 40000 gwei; //box type 3: mega_box price
     }
 
     function supportsInterface(bytes4 interfaceId)
