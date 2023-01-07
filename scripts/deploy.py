@@ -186,6 +186,6 @@ def main():
     print(f'export const addressSaturnBox = "{saturn_box_a}";')
     print(f'export const addressSaturnMKP = "{saturn_mkp_a}";')
 
-    test_get_catalog(resp)
+    # test_get_catalog(resp)
     # test_buy_a_box(resp)
     # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)

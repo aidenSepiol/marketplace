@@ -20,26 +20,6 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     // we use this to count the number of tokens is listing in the maketplace
     Counters.Counter private countTokenListing;
 
-    //event
-    event requestOnChain(address requester, uint256 tokenId);
-
-    // this is the listing fee when you list your NFT to maketplace
-    uint256 private listingPrice = 2000000000000 wei;
-    uint256 private onChainPrice = 2000000000000 wei;
-    uint256 private offChainPrice = 2000000000000 wei;
-
-    // Optional mapping for token details
-    mapping(uint256 => uint256) private _tokenURIDetails;
-
-    //
-    mapping(address => uint256) private addressToCountAddressListing;
-
-    // this is admin, the ones who deploy this contract, we use this to recognize him when some call a function that only admin can call
-    address payable admin;
-
-    // agent repo
-    IAgentRepo public aRepo;
-
     // an object in list items
     struct marketItem {
         // uint256 _tokenId;
@@ -59,6 +39,30 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         string _tokenImg;
         string _tokenName;
     }
+    //event
+    event requestOnChain(address requester, uint256 tokenId);
+    event toOffChain(address requester, uint256 tokenId);
+    event toOnChain(address requester, uint256 tokenId);
+    event doSellNFT(address requester, uint256 tokenId, uint256 price);
+    event soPurchaseNFT(address requester, uint256 tokenId);
+    event mintToken(address requester, fetchItem tokenDetail);
+
+    // this is the listing fee when you list your NFT to maketplace
+    uint256 private listingPrice = 2000000000000 wei;
+    uint256 private onChainPrice = 2000000000000 wei;
+    uint256 private offChainPrice = 2000000000000 wei;
+
+    // Optional mapping for token details
+    mapping(uint256 => uint256) private _tokenURIDetails;
+
+    //
+    mapping(address => uint256) private addressToCountAddressListing;
+
+    // this is admin, the ones who deploy this contract, we use this to recognize him when some call a function that only admin can call
+    address payable admin;
+
+    // agent repo
+    IAgentRepo public aRepo;
 
     // mapping store all the item in maketplace
     mapping(uint256 => marketItem) private tokenIdToItem;
@@ -183,6 +187,25 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
             0,
             false
         );
+        // emit new token
+        AgentDetail.Detail memory detail = AgentDetail.decode(tokenURI);
+        string memory aName;
+        string memory aImg;
+        (aName, aImg) = aRepo.getAgentNameAndImg(detail.agentId);
+        emit mintToken(
+            owner,
+            fetchItem(
+                detail,
+                newTokenId,
+                // tokenIdToItem[i]._tokenId,
+                tokenIdToItem[newTokenId]._seller,
+                tokenIdToItem[newTokenId]._owner,
+                tokenIdToItem[newTokenId]._price,
+                tokenIdToItem[newTokenId]._isSelling,
+                aImg,
+                aName
+            )
+        );
     }
 
     function sellNFT(uint256 tokenId, uint256 price)
@@ -208,6 +231,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         _transfer(msg.sender, address(this), tokenId);
         addressToCountAddressListing[msg.sender] += 1;
         payable(admin).transfer(listingPrice);
+        emit doSellNFT(msg.sender, tokenId, price);
     }
 
     function purchaseNFT(uint256 tokenId) external payable {
@@ -221,6 +245,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         _transfer(address(this), msg.sender, tokenId);
         payable(seller).transfer(msg.value);
         addressToCountAddressListing[seller] -= 1;
+        emit soPurchaseNFT(msg.sender, tokenId);
     }
 
     // function withdrawNFT(uint256 tokenId) external payable {}
@@ -245,6 +270,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         AgentDetail.Detail memory details = AgentDetail.decode(agentEncoded);
         details.isOnchain = 1;
         _tokenURIDetails[tokenId] = details.encode();
+        emit toOnChain(ownerOf(tokenId), tokenId);
     }
 
     function isOnChain(uint256 tokenId)
@@ -275,6 +301,8 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         );
         details.isOnchain = 0;
         _tokenURIDetails[tokenId] = details.encode();
+
+        emit toOffChain(msg.sender, tokenId);
     }
 
     // get all Items that are listing on marketplace
@@ -289,7 +317,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                 );
                 string memory aName;
                 string memory aImg;
-                (aName, aImg) = aRepo.getAgentNameAndImg(i);
+                (aName, aImg) = aRepo.getAgentNameAndImg(detail.agentId);
                 listItems[index] = fetchItem(
                     detail,
                     i,
@@ -322,7 +350,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                 );
                 string memory aName;
                 string memory aImg;
-                (aName, aImg) = aRepo.getAgentNameAndImg(i);
+                (aName, aImg) = aRepo.getAgentNameAndImg(detail.agentId);
                 listItems[index] = fetchItem(
                     detail,
                     i,
@@ -352,7 +380,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
                 );
                 string memory aName;
                 string memory aImg;
-                (aName, aImg) = aRepo.getAgentNameAndImg(i);
+                (aName, aImg) = aRepo.getAgentNameAndImg(detail.agentId);
                 listItems[index] = fetchItem(
                     detail,
                     i,

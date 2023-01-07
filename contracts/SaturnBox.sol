@@ -25,6 +25,9 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
     IAgentRepo public aRepo;
     ISaturnMarketPlace public iSaturnMarketPlace;
 
+    //event
+    event doPurchaseBox(address requester, uint256 tokenId, uint256 typeBox);
+
     struct catalogItem {
         uint256 _boxType;
         string _img;
@@ -66,8 +69,8 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
         typeBoxtoURI[3] = "http://localhost/#######/img3.png"; //box type 2: mega_box image url
         // initialize box price
         typeBoxtoPrice[1] = 20000000000000 wei; //box type 1: small_box price
-        typeBoxtoPrice[2] = 30000000000000 gwei; //box type 2: big_box price
-        typeBoxtoPrice[3] = 40000000000000 gwei; //box type 3: mega_box price
+        typeBoxtoPrice[2] = 30000000000000 wei; //box type 2: big_box price
+        typeBoxtoPrice[3] = 40000000000000 wei; //box type 3: mega_box price
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -187,6 +190,7 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
         tokenIdToBoxDetail[tokenId]._owner_by = msg.sender;
         addressToCountToken[msg.sender] += 1;
         payable(admin).transfer(tokenIdToBoxDetail[tokenId]._price);
+        emit doPurchaseBox(msg.sender, tokenId, typeBox);
     }
 
     // open a box
