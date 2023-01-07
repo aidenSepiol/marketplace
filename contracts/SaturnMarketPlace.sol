@@ -44,7 +44,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     event toOffChain(address requester, uint256 tokenId);
     event toOnChain(address requester, uint256 tokenId);
     event doSellNFT(address requester, uint256 tokenId, uint256 price);
-    event soPurchaseNFT(address requester, uint256 tokenId);
+    event doPurchaseNFT(address requester, uint256 tokenId);
     event mintToken(address requester, fetchItem tokenDetail);
 
     // this is the listing fee when you list your NFT to maketplace
@@ -245,7 +245,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         _transfer(address(this), msg.sender, tokenId);
         payable(seller).transfer(msg.value);
         addressToCountAddressListing[seller] -= 1;
-        emit soPurchaseNFT(msg.sender, tokenId);
+        emit doPurchaseNFT(msg.sender, tokenId);
     }
 
     // function withdrawNFT(uint256 tokenId) external payable {}
