@@ -169,6 +169,12 @@ def test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(contracts_
     print(my_item)
 
 
+def test_get_catalog(contracts_dict):
+    account_2 = get_account(index=2)
+    catalog = contracts_dict["address_saturn_box"].getCatalog({"from": account_2})
+    print(f"Catalog {catalog}")
+
+
 def main():
     resp = deploy_contract()
     print("Deploy successfully!")
@@ -180,5 +186,6 @@ def main():
     print(f'export const addressSaturnBox = "{saturn_box_a}";')
     print(f'export const addressSaturnMKP = "{saturn_mkp_a}";')
 
-    test_buy_a_box(resp)
+    test_get_catalog(resp)
+    # test_buy_a_box(resp)
     # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
