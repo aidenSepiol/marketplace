@@ -25,14 +25,17 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
     IAgentRepo public aRepo;
     ISaturnMarketPlace public iSaturnMarketPlace;
 
-    // struct WeightAgentRarity {
-    //     uint256 _common;
-    //     uint256 _rare;
-    //     uint256 _elite;
-    //     uint256 _epic;
-    //     uint256 _legendary;
-    //     uint256 _mythical;
-    // }
+    struct catalogItem {
+        uint256 _boxType;
+        string _img;
+        uint256 _price;
+        uint256 _commonWeight;
+        uint256 _rareWeight;
+        uint256 _eliteWeight;
+        uint256 _epicWeight;
+        uint256 _legendaryWeight;
+        uint256 _mythicalWeight;
+    }
 
     mapping(uint256 => string) private typeBoxtoURI;
     mapping(uint256 => uint256) private typeBoxtoPrice;
@@ -84,6 +87,11 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
     ) external onlyRole(ADMIN_ROLE) {
         aRepo = IAgentRepo(contractAddressAgentRepo);
         iSaturnMarketPlace = ISaturnMarketPlace(contractAddressSaturnMKP);
+    }
+
+    // view function to get the open Box price
+    function getOpenBoxPrice() external view returns (uint256) {
+        return openPrice;
     }
 
     // update weight for each box type, require admin
@@ -200,6 +208,25 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
         // set status box
         tokenIdToBoxDetail[tokenId]._is_opened = true;
         addressToCountToken[msg.sender] -= 1;
+    }
+
+    function getCatalog() external view returns (catalogItem[] memory) {
+        catalogItem[] memory catalogs = new catalogItem[](countBoxTypes);
+        for (uint256 i = 0; i < countBoxTypes; i++) {
+            catalogItem memory item = catalogItem(
+                i,
+                typeBoxtoURI[i],
+                typeBoxtoPrice[i],
+                typeBoxtoWeight[i][0],
+                typeBoxtoWeight[i][1],
+                typeBoxtoWeight[i][2],
+                typeBoxtoWeight[i][3],
+                typeBoxtoWeight[i][4],
+                typeBoxtoWeight[i][5]
+            );
+            catalogs[i] = item;
+        }
+        return catalogs;
     }
 
     // get my box

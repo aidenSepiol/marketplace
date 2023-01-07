@@ -20,6 +20,9 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     // we use this to count the number of tokens is listing in the maketplace
     Counters.Counter private countTokenListing;
 
+    //event
+    event requestOnChain(address requester, uint256 tokenId);
+
     // this is the listing fee when you list your NFT to maketplace
     uint256 private listingPrice = 25000000000 wei;
     uint256 private onChainPrice = 25000000000 wei;
@@ -76,6 +79,14 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         _;
     }
 
+    modifier requireOffChain(uint256 tokenId) {
+        AgentDetail.Detail memory details = AgentDetail.decode(
+            _tokenURIDetails[tokenId]
+        );
+        require(details.isOnchain == 0, "Requires offChain");
+        _;
+    }
+
     constructor(address saturnBoxAddress) ERC721("SaturnMKP", "SMKP") {
         admin = payable(msg.sender);
         _setupRole(ADMIN_ROLE, admin);
@@ -109,9 +120,37 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         listingPrice = newPrice;
     }
 
+    // for admin only: to update listing price
+    function updateOnChainPrice(uint256 newPrice)
+        external
+        payable
+        onlyRole(ADMIN_ROLE)
+    {
+        onChainPrice = newPrice;
+    }
+
+    // for admin only: to update listing price
+    function updateOffChainPrice(uint256 newPrice)
+        external
+        payable
+        onlyRole(ADMIN_ROLE)
+    {
+        offChainPrice = newPrice;
+    }
+
     // view function to get the listing price
     function getListingPrice() external view returns (uint256) {
         return listingPrice;
+    }
+
+    // view function to get the onchain price
+    function getOnChainPrice() external view returns (uint256) {
+        return onChainPrice;
+    }
+
+    // view function to get the offchain price
+    function getOffChainPrice() external view returns (uint256) {
+        return offChainPrice;
     }
 
     // only contract can request this function
@@ -186,6 +225,18 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
 
     // function withdrawNFT(uint256 tokenId) external payable {}
 
+    function doRequestOnChain(uint256 tokenId)
+        external
+        payable
+        requireOffChain(tokenId)
+    {
+        address owner = msg.sender;
+        require(ownerOf(tokenId) == owner, "Token not owned");
+        require(msg.value == onChainPrice, "Required payment!");
+        payable(admin).transfer(msg.value);
+        emit requestOnChain(msg.sender, tokenId);
+    }
+
     function onChain(uint256 tokenId, uint256 agentEncoded)
         external
         onlyRole(ADMIN_ROLE)
@@ -194,6 +245,23 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         AgentDetail.Detail memory details = AgentDetail.decode(agentEncoded);
         details.isOnchain = 1;
         _tokenURIDetails[tokenId] = details.encode();
+    }
+
+    function isOnChain(uint256 tokenId)
+        external
+        view
+        onlyRole(ADMIN_ROLE)
+        returns (bool)
+    {
+        AgentDetail.Detail memory detail = AgentDetail.decode(
+            _tokenURIDetails[tokenId]
+        );
+
+        if (detail.isOnchain == 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /** Update warrior off chain for the owner. */

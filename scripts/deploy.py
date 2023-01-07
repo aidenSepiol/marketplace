@@ -10,33 +10,33 @@ def deploy_contract():
     # Deploy the contract AgentRepo
     address_agent_repo = AgentRepo.deploy({"from": account})
     # Deploy the contract of Agent (10 agents)
-    address_agent_breach = ABreach.deploy(address_agent_repo, {"from": account})
-    address_agent_brimstone = ABrimStone.deploy(address_agent_repo, {"from": account})
-    address_agent_cypher = ACypher.deploy(address_agent_repo, {"from": account})
-    address_agent_jett = AJett.deploy(address_agent_repo, {"from": account})
-    address_agent_omen = AOmen.deploy(address_agent_repo, {"from": account})
-    address_agent_phoenix = APhoenix.deploy(address_agent_repo, {"from": account})
-    address_agent_raze = ARaze.deploy(address_agent_repo, {"from": account})
-    address_agent_sage = ASage.deploy(address_agent_repo, {"from": account})
-    address_agent_sova = ASova.deploy(address_agent_repo, {"from": account})
-    address_agent_viper = AViper.deploy(address_agent_repo, {"from": account})
+    address_agent_breach = ABreach.deploy(address_agent_repo.address, {"from": account})
+    address_agent_brimstone = ABrimStone.deploy(address_agent_repo.address, {"from": account})
+    address_agent_cypher = ACypher.deploy(address_agent_repo.address, {"from": account})
+    address_agent_jett = AJett.deploy(address_agent_repo.address, {"from": account})
+    address_agent_omen = AOmen.deploy(address_agent_repo.address, {"from": account})
+    address_agent_phoenix = APhoenix.deploy(address_agent_repo.address, {"from": account})
+    address_agent_raze = ARaze.deploy(address_agent_repo.address, {"from": account})
+    address_agent_sage = ASage.deploy(address_agent_repo.address, {"from": account})
+    address_agent_sova = ASova.deploy(address_agent_repo.address, {"from": account})
+    address_agent_viper = AViper.deploy(address_agent_repo.address, {"from": account})
     # Deploy the contract SaturnBox
     address_saturn_box = SaturnBox.deploy({"from": account})
     # Deploy the contract SaturnMarketPlace
-    address_saturn_mkp = SaturnMarketPlace.deploy(address_saturn_box, {"from": account})
+    address_saturn_mkp = SaturnMarketPlace.deploy(address_saturn_box.address, {"from": account})
 
     # For AgentRepo
     list_agent_address = [
-        address_agent_breach,
-        address_agent_brimstone,
-        address_agent_cypher,
-        address_agent_jett,
-        address_agent_omen,
-        address_agent_phoenix,
-        address_agent_raze,
-        address_agent_sage,
-        address_agent_sova,
-        address_agent_viper
+        address_agent_breach.address,
+        address_agent_brimstone.address,
+        address_agent_cypher.address,
+        address_agent_jett.address,
+        address_agent_omen.address,
+        address_agent_phoenix.address,
+        address_agent_raze.address,
+        address_agent_sage.address,
+        address_agent_sova.address,
+        address_agent_viper.address
     ]
     list_agent_weights = [1] * len(list_agent_address)
     list_agent_imgs = [
@@ -53,17 +53,17 @@ def deploy_contract():
     ]
     list_agent_names = ["name0", "name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8", "name9"]
     address_agent_repo.initializeAgent(list_agent_address, list_agent_weights, list_agent_imgs, list_agent_names, {"from": account})
-    address_agent_repo.setupRoleSaturnBox(address_saturn_box, {"from": account})
-    address_agent_repo.setupRoleSaturnMKP(address_saturn_mkp, {"from": account})
+    address_agent_repo.setupRoleSaturnBox(address_saturn_box.address, {"from": account})
+    address_agent_repo.setupRoleSaturnMKP(address_saturn_mkp.address, {"from": account})
 
     # For SaturnBox
-    address_saturn_box.initializeContract(address_agent_repo, address_saturn_mkp, {"from": account})
+    address_saturn_box.initializeContract(address_agent_repo.address, address_saturn_mkp.address, {"from": account})
     address_saturn_box.updateBoxURI(1, "http://localhost/#######/bimg1.png", {"from": account})
     address_saturn_box.updateBoxURI(2, "http://localhost/#######/bimg2.png", {"from": account})
     address_saturn_box.updateBoxURI(3, "http://localhost/#######/bimg3.png", {"from": account})
 
     # For SaturnMarketPlace
-    address_saturn_mkp.initializeContract(address_agent_repo, {"from": account})
+    address_saturn_mkp.initializeContract(address_agent_repo.address, {"from": account})
 
     response_data = {
         "address_agent_repo": address_agent_repo,
@@ -172,5 +172,11 @@ def test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(contracts_
 def main():
     resp = deploy_contract()
     print("Deploy successfully!")
-    print(resp)
-    test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
+    saturn_box_a = resp["address_saturn_box"].address
+    print(f"SaturnBox address: {saturn_box_a}")
+    saturn_mkp_a = resp["address_saturn_mkp"].address
+    print(f"SaturnMarketplace address: {saturn_mkp_a}")
+
+    print(f'export const addressSaturnBox = "{saturn_box_a}";')
+    print(f'export const addressSaturnMKP = "{saturn_mkp_a}";')
+    # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
