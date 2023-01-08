@@ -203,7 +203,10 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
         //request mint agent in saturnMKP
         //get random rarity => 0:common, 1:rare, 2:elite, 3:epic, 4:legendary, 5:mythical
         uint256 rarity;
-        (seed, rarity) = Utils.randomByWeights(seed, typeBoxtoWeight[tokenId]);
+        (seed, rarity) = Utils.randomByWeights(
+            seed,
+            typeBoxtoWeight[tokenIdToBoxDetail[tokenId]._box_type]
+        );
         //random agentName => request contract AgenRepo
         uint256 agentId;
         (seed, agentId) = aRepo.getRandomAgentId(seed);
