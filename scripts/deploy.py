@@ -84,6 +84,12 @@ def deploy_contract():
     return response_data
 
 
+def test_get_price(contracts_dict):
+    account_2 = get_account(index=2)
+    result = contracts_dict["address_saturn_mkp"].getWithdrawPrice({"from": account_2})
+    print(f"getWithdrawPrice: {result}")
+
+
 def test_buy_a_box(contracts_dict):
     import time
     account_2 = get_account(index=2)
@@ -199,6 +205,7 @@ def main():
     print(f'export const addressSaturnBox = "{saturn_box_a}";')
     print(f'export const addressSaturnMKP = "{saturn_mkp_a}";')
 
+    # test_get_price(resp)
     # test_get_catalog(resp)
     # test_buy_a_box(resp)
     # test_buy_and_open_a_box(resp)
