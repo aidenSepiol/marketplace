@@ -199,6 +199,10 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
         // check if the blocknumber is already valid or not
         uint256 targetBlock = tokenIdToBoxDetail[tokenId]._targetBLock;
         require(targetBlock < block.number, "Target block not arrived");
+        require(
+            tokenIdToBoxDetail[tokenId]._is_opened == false,
+            "This Box is opened"
+        );
         uint256 seed = uint256(blockhash(targetBlock));
         //request mint agent in saturnMKP
         //get random rarity => 0:common, 1:rare, 2:elite, 3:epic, 4:legendary, 5:mythical
