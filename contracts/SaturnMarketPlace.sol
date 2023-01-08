@@ -397,4 +397,40 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         }
         return listItems;
     }
+
+    function getItemByTokenId(uint256 tokenId)
+        public
+        view
+        returns (fetchItem memory)
+    {
+        AgentDetail.Detail memory detail = AgentDetail.decode(
+            _tokenURIDetails[tokenId]
+        );
+        string memory aName;
+        string memory aImg;
+        (aName, aImg) = aRepo.getAgentNameAndImg(detail.agentId);
+        return
+            fetchItem(
+                detail,
+                tokenId,
+                // tokenIdToItem[i]._tokenId,
+                tokenIdToItem[tokenId]._seller,
+                tokenIdToItem[tokenId]._owner,
+                tokenIdToItem[tokenId]._price,
+                tokenIdToItem[tokenId]._isSelling,
+                aImg,
+                aName
+            );
+    }
+
+    function getItemByTokenIds(uint256[] memory tokenIds)
+        external
+        view
+        returns (fetchItem[] memory)
+    {
+        fetchItem[] memory listItems = new fetchItem[](tokenIds.length);
+        for (uint256 i = 0; i < tokenIds.length; i++)
+            listItems[i] = getItemByTokenId(tokenIds[i]);
+        return listItems;
+    }
 }

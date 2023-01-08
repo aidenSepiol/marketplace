@@ -105,12 +105,12 @@ def test_buy_and_open_a_box(contracts_dict):
     # buy a box
     print("Buying a box........")
     account_2 = get_account(index=2)
-    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 100000000})
-    contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 100000000})
-    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 100000000})
-    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 100000000})
-    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 100000000})
-    contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 100000000})
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 20000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 40000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 30000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 20000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 30000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 40000000000000})
     my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
     print(f"Bought successfully: {my_box}")
 
@@ -123,7 +123,7 @@ def test_buy_and_open_a_box(contracts_dict):
     print("Opening my first box........")
     first_box = my_box[0]
     box_id = first_box[0]
-    contracts_dict["address_saturn_box"].openBox(box_id, {"from": account_2, "value": 25000000000})
+    contracts_dict["address_saturn_box"].openBox(box_id, {"from": account_2, "value": 2000000000000})
     my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
     print(f"Opened my first box successfully, my box left: {my_box}")
 
@@ -188,4 +188,5 @@ def main():
 
     # test_get_catalog(resp)
     # test_buy_a_box(resp)
+    test_buy_and_open_a_box(resp)
     # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
