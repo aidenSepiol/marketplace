@@ -2,6 +2,7 @@ from brownie import Wei, ABreach, ABrimStone, ACypher, AJett, AOmen, APhoenix, A
 
 from scripts.helper import get_account
 from web3 import Web3
+import json
 
 
 def deploy_contract():
@@ -112,6 +113,9 @@ def test_buy_and_open_a_box(contracts_dict):
     contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 30000000000000})
     contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 40000000000000})
     contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 40000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 30000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 20000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 30000000000000})
     my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
     print(f"Bought successfully: {my_box}")
 
@@ -122,9 +126,11 @@ def test_buy_and_open_a_box(contracts_dict):
     # open my box
 
     print("Opening my first box........")
-    first_box = my_box[0]
-    box_id = first_box[0]
-    contracts_dict["address_saturn_box"].openBox(box_id, {"from": account_2, "value": 2000000000000})
+    # first_box = my_box[0][0]
+    # box_id = first_box[0]
+    contracts_dict["address_saturn_box"].openBox(my_box[0][0], {"from": account_2, "value": 2000000000000})
+    contracts_dict["address_saturn_box"].openBox(my_box[1][0], {"from": account_2, "value": 2000000000000})
+    contracts_dict["address_saturn_box"].openBox(my_box[2][0], {"from": account_2, "value": 2000000000000})
     my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
     print(f"Opened my first box successfully, my box left: {my_box}")
 
@@ -178,6 +184,12 @@ def test_get_catalog(contracts_dict):
 
 def main():
     resp = deploy_contract()
+    addresses = {}
+    for key, value in resp.items():
+        addresses.update({key: value.address})
+    print(f"Addresses {addresses}")
+    with open("contract.json", "w") as f:
+        f.write(json.dumps(addresses))
     print("Deploy successfully!")
     saturn_box_a = resp["address_saturn_box"].address
     print(f"SaturnBox address: {saturn_box_a}")
@@ -190,4 +202,4 @@ def main():
     # test_get_catalog(resp)
     # test_buy_a_box(resp)
     # test_buy_and_open_a_box(resp)
-    test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
+    # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
