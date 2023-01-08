@@ -40,27 +40,27 @@ def deploy_contract():
     ]
     list_agent_weights = [1] * len(list_agent_address)
     list_agent_imgs = [
-        "http://localhost/#######/aimg0.png",
-        "http://localhost/#######/aimg1.png",
-        "http://localhost/#######/aimg2.png",
-        "http://localhost/#######/aimg3.png",
-        "http://localhost/#######/aimg4.png",
-        "http://localhost/#######/aimg5.png",
-        "http://localhost/#######/aimg6.png",
-        "http://localhost/#######/aimg7.png",
-        "http://localhost/#######/aimg8.png",
-        "http://localhost/#######/aimg9.png"
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/centaur.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/cyclops.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/demon.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/gargoyle.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/griffin.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/manticore.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/minotaur.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/satyr.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/succubus.jpg",
+        "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/werewolf.jpg"
     ]
-    list_agent_names = ["name0", "name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8", "name9"]
+    list_agent_names = ["Centaur", "Cyclops", "Demon", "Gargoyle", "Griffin", "Manticore", "Minotaur", "Satyr", "Succubus", "Werewolf"]
     address_agent_repo.initializeAgent(list_agent_address, list_agent_weights, list_agent_imgs, list_agent_names, {"from": account})
     address_agent_repo.setupRoleSaturnBox(address_saturn_box.address, {"from": account})
     address_agent_repo.setupRoleSaturnMKP(address_saturn_mkp.address, {"from": account})
 
     # For SaturnBox
     address_saturn_box.initializeContract(address_agent_repo.address, address_saturn_mkp.address, {"from": account})
-    address_saturn_box.updateBoxURI(1, "http://localhost/#######/bimg1.png", {"from": account})
-    address_saturn_box.updateBoxURI(2, "http://localhost/#######/bimg2.png", {"from": account})
-    address_saturn_box.updateBoxURI(3, "http://localhost/#######/bimg3.png", {"from": account})
+    address_saturn_box.updateBoxURI(1, "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/smallBox.jpg", {"from": account})
+    address_saturn_box.updateBoxURI(2, "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/bigBox.jpg", {"from": account})
+    address_saturn_box.updateBoxURI(3, "https://gateway.pinata.cloud/ipfs/QmQJarrWrT9qNVWHkBGHJnDPD7LcxXVJsAePJogamuqpv4/megaBox.jpg", {"from": account})
 
     # For SaturnMarketPlace
     address_saturn_mkp.initializeContract(address_agent_repo.address, {"from": account})
@@ -188,5 +188,5 @@ def main():
 
     # test_get_catalog(resp)
     # test_buy_a_box(resp)
-    test_buy_and_open_a_box(resp)
+    # test_buy_and_open_a_box(resp)
     # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
