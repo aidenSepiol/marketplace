@@ -299,12 +299,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         emit toOnChain(ownerOf(tokenId), tokenId);
     }
 
-    function isOnChain(uint256 tokenId)
-        external
-        view
-        onlyRole(ADMIN_ROLE)
-        returns (bool)
-    {
+    function isOnChain(uint256 tokenId) external view returns (bool) {
         AgentDetail.Detail memory detail = AgentDetail.decode(
             _tokenURIDetails[tokenId]
         );
