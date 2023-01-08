@@ -46,9 +46,11 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     event doSellNFT(address requester, uint256 tokenId, uint256 price);
     event doPurchaseNFT(address requester, uint256 tokenId);
     event mintToken(address requester, fetchItem tokenDetail);
+    event doWithdrawNFT(address requester, uint256 tokenId);
 
     // this is the listing fee when you list your NFT to maketplace
     uint256 private listingPrice = 2000000000000 wei;
+    uint256 private withdrawPrice = 2000000000000 wei;
     uint256 private onChainPrice = 2000000000000 wei;
     uint256 private offChainPrice = 2000000000000 wei;
 
@@ -145,6 +147,11 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
     // view function to get the listing price
     function getListingPrice() external view returns (uint256) {
         return listingPrice;
+    }
+
+    // view function to get the withdraw price
+    function getWithdrawPrice() external view returns (uint256) {
+        return withdrawPrice;
     }
 
     // view function to get the onchain price
@@ -249,7 +256,25 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         emit doPurchaseNFT(msg.sender, tokenId);
     }
 
-    // function withdrawNFT(uint256 tokenId) external payable {}
+    function withdrawNFT(uint256 tokenId)
+        external
+        payable
+        requireOnChain(tokenId)
+    {
+        require(msg.value == withdrawPrice);
+        require(
+            tokenIdToItem[tokenId]._isSelling == true &&
+                tokenIdToItem[tokenId]._seller == payable(msg.sender)
+        );
+        countTokenListing.decrement();
+        tokenIdToItem[tokenId]._seller = payable(address(0));
+        tokenIdToItem[tokenId]._owner = payable(msg.sender);
+        tokenIdToItem[tokenId]._isSelling = false;
+        _transfer(address(this), msg.sender, tokenId);
+        payable(admin).transfer(msg.value);
+        addressToCountAddressListing[msg.sender] -= 1;
+        emit doWithdrawNFT(msg.sender, tokenId);
+    }
 
     function doRequestOnChain(uint256 tokenId)
         external
