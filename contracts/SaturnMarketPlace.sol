@@ -238,6 +238,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         uint256 tokenPrice = tokenIdToItem[tokenId]._price;
         address payable seller = tokenIdToItem[tokenId]._seller;
         require(msg.value == tokenPrice, "Require payment!");
+        require(msg.sender != seller, "You can't buy your own");
         countTokenListing.decrement();
         tokenIdToItem[tokenId]._seller = payable(address(0));
         tokenIdToItem[tokenId]._owner = payable(msg.sender);
@@ -301,7 +302,7 @@ contract SaturnMarketPlace is ERC721URIStorage, AccessControl {
         );
         details.isOnchain = 0;
         _tokenURIDetails[tokenId] = details.encode();
-
+        payable(admin).transfer(msg.value);
         emit toOffChain(msg.sender, tokenId);
     }
 

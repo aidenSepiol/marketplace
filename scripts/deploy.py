@@ -111,6 +111,7 @@ def test_buy_and_open_a_box(contracts_dict):
     contracts_dict["address_saturn_box"].purchaseBox(1, {"from": account_2, "value": 20000000000000})
     contracts_dict["address_saturn_box"].purchaseBox(2, {"from": account_2, "value": 30000000000000})
     contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 40000000000000})
+    contracts_dict["address_saturn_box"].purchaseBox(3, {"from": account_2, "value": 40000000000000})
     my_box = contracts_dict["address_saturn_box"].getMyBox({"from": account_2})
     print(f"Bought successfully: {my_box}")
 
@@ -141,7 +142,7 @@ def test_buy_and_open_a_box_then_list_to_marketplace(contracts_dict):
     # option test on chain require
     # contracts_dict["address_saturn_mkp"].offChain(tokenId, {"from": account_2, "value": 25000000000})
     # list
-    contracts_dict["address_saturn_mkp"].sellNFT(tokenId, 25000000000, {"from": account_2, "value": 25000000000})
+    contracts_dict["address_saturn_mkp"].sellNFT(tokenId, 25000000000, {"from": account_2, "value": 2000000000000})
     print("Listed my first NFT to marketplace successfully!!")
 
     # my nft
@@ -189,4 +190,4 @@ def main():
     # test_get_catalog(resp)
     # test_buy_a_box(resp)
     # test_buy_and_open_a_box(resp)
-    # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
+    test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)

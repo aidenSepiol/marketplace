@@ -212,6 +212,7 @@ contract SaturnBox is ERC721URIStorage, AccessControl {
         // set status box
         tokenIdToBoxDetail[tokenId]._is_opened = true;
         addressToCountToken[msg.sender] -= 1;
+        payable(admin).transfer(msg.value);
     }
 
     function getCatalog() external view returns (catalogItem[] memory) {
