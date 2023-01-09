@@ -1,15 +1,15 @@
 {
-    "address_agent_repo": "0xB778dE788C5dc2C62A28ff87Dc0d4252da059569",
-    "address_agent_breach": "0x050Ecc64e013a3ACcf9cFdCBB3133D802ceb9a74",
-    "address_agent_brimstone": "0xCf6C0A9781bF4C9b3611d51935ad8d75af1438bf",
-    "address_agent_cypher": "0x4957c0E8A16471e5755A8531163baa14e21B64C6",
-    "address_agent_jett": "0x09fAf94e845F4665DcFB5B2013d17b7c8a2196bA",
-    "address_agent_omen": "0x1f6d94754eF7EBF61e06E234f9791e2527f3e592",
-    "address_agent_phoenix": "0xC01E9b6062232d4Ceb172Ed8881cCCE83f598C19",
-    "address_agent_raze": "0x690786F8293913D907FD24e42437D3b14Cf11666",
-    "address_agent_sage": "0x29A4CeAB222Aa0E6B683AdD0b7f29e529cF504ab",
-    "address_agent_sova": "0x00120670B7b557aE926D39929A63c676a9eA4C82",
-    "address_agent_viper": "0x9C2CAcEF1EFe9C8e66dAE472844582D8c26dFac0",
-    "address_saturn_box": "0x18A3286d49Bc74b5e39A1E0C026B203122853d7C",
-    "address_saturn_mkp": "0x84fDD04Bc2DDAe9C8bB663d6AdDCEC84c6Ead46c"
+    "address_agent_repo": "0xbe33DF7Cf9f42f58Db699f39F1450B9D54D33489",
+    "address_agent_breach": "0xF2C2C33078181F46c08805bcd8ed3667Fb33ea04",
+    "address_agent_brimstone": "0xcc91f61014c1b8bdF311060356fB9B4C548185E4",
+    "address_agent_cypher": "0x6aa79A026581115df6431e269fa01D15587DD8FC",
+    "address_agent_jett": "0x3D5BCB2D712BEE496aCE7de6F462ac65F2Fe0C08",
+    "address_agent_omen": "0xEE70c12BF6dc2417368152F1221ba56266132428",
+    "address_agent_phoenix": "0xae82Ffe60D13aA421A632EED3a785c8f8290f609",
+    "address_agent_raze": "0xfB02B0E42255354A1Ef51A912980B1c09912C55d",
+    "address_agent_sage": "0xbc45aA11cfb0246E9bBB681158f224c4142E6A43",
+    "address_agent_sova": "0x8c1f99B9771193E759c9BDB0af8A1966C0a6b2AA",
+    "address_agent_viper": "0x088d9306917f488d44aaEF302503bc922d69F67a",
+    "address_saturn_box": "0x83957c709F7c6aaBdd6886430246Bb4215a70545",
+    "address_saturn_mkp": "0x6B78dBb64FE42cAA4D7A67c21BcCe233A721fcFC"
 }

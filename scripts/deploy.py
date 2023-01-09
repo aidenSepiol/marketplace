@@ -145,6 +145,17 @@ def test_buy_and_open_a_box(contracts_dict):
     print(f"Inventory after openBox: {after}")
 
 
+def test_buy_and_open_a_box_then_offchain_onchain(contracts_dict):
+    test_buy_and_open_a_box(contracts_dict)
+    print("Listing my first NFT to marketplace........")
+    account_2 = get_account(index=2)
+    contracts_dict["address_saturn_mkp"].offChain(1, {"from": account_2, "value": 2000000000000})
+    account_admin = get_account()
+    contracts_dict["address_saturn_mkp"].onChain(1, 10483722334555312965401533399195745946207778397749250, {"from": account_admin})
+    result = contracts_dict["address_saturn_mkp"].isOnChain(1, {"from": account_2})
+    print(f"onchain : {result}")
+
+
 def test_buy_and_open_a_box_then_list_to_marketplace(contracts_dict):
     test_buy_and_open_a_box(contracts_dict)
     print("Listing my first NFT to marketplace........")
@@ -208,5 +219,6 @@ def main():
     # test_get_price(resp)
     # test_get_catalog(resp)
     # test_buy_a_box(resp)
+    # test_buy_and_open_a_box_then_offchain_onchain(resp)
     # test_buy_and_open_a_box(resp)
     # test_buy_and_open_a_box_then_list_to_marketplace_and_other_buy_it(resp)
